@@ -23,8 +23,8 @@ export const Route = createRootRoute({
       { rel: "icon", href: "/icon.png", type: "image/png" },
     ],
   }),
-  // The locale comes from the URL alone: /en/… is English, bare paths are the
-  // default locale. `context`, not beforeLoad, on purpose: in SPA mode the
+  // The locale comes from the URL alone: /zh/… is Chinese, bare paths are the
+  // default locale (English). `context`, not beforeLoad, on purpose: in SPA mode the
   // shell is prerendered once at "/", and hydration reuses the shell's
   // beforeLoad result as-is, while `context` is recomputed in the browser from
   // the real URL.

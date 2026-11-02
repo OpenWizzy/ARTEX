@@ -1,14 +1,14 @@
 import { type I18n, type MessageDescriptor, type Messages, setupI18n } from "@lingui/core";
 
 export const locales = {
-  zh: "简体中文",
   en: "English",
+  zh: "简体中文",
 } as const;
 
 export type Locale = keyof typeof locales;
 
 /** Served at bare paths. A request for `/<defaultLocale>/…` redirects to the bare path. */
-export const defaultLocale: Locale = "zh";
+export const defaultLocale: Locale = "en";
 
 // Dynamic per-locale loading: each compiled catalog becomes its own Vite chunk
 // and only the ACTIVE locale's chunk ever reaches the browser.

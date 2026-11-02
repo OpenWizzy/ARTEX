@@ -7,7 +7,7 @@ export const Route = createFileRoute("/$lang")({
     if (!isValidLocale(params.lang)) {
       throw notFound();
     }
-    // The default locale lives at bare paths: /zh/… is a duplicate of …
+    // The default locale lives at bare paths: /en/… is a duplicate of …
     if (params.lang === defaultLocale) {
       const path = stripLocaleFromPathname(location.pathname);
       const hash = location.hash ? `#${location.hash}` : "";

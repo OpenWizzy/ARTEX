@@ -13,7 +13,7 @@ export default function I18nProvider({ children }: { children: React.ReactNode }
   const i18n = use(loadI18n(locale));
 
   // The prerendered shell is always the default locale; a page opened at
-  // /en/… corrects <html lang> here (hydration keeps the shell's attribute).
+  // /zh/… corrects <html lang> here (hydration keeps the shell's attribute).
   useEffect(() => {
     document.documentElement.lang = locale;
   }, [locale]);

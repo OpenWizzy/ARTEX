@@ -8,7 +8,7 @@ export function getRouter() {
     routeTree,
 
     // A URL that matches no route renders at the deepest layout it got into
-    // (`/en/typo` at /$lang); those layouts carry no notFoundComponent of their
+    // (`/zh/typo` at /$lang); those layouts carry no notFoundComponent of their
     // own, so without a default the router falls back to its bare
     // `<p>Not Found</p>`. Same page as the root's notFoundComponent.
     defaultNotFoundComponent: NotFound,
