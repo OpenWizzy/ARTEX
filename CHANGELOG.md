@@ -12,7 +12,7 @@
 
 #### 变更
 
-- **前端框架从 Next.js 换成 TanStack Start**：仍以 SPA 模式构建成纯静态站点，产物照旧输出到 `web/out` 并内嵌进 Go 二进制，`build.sh` / `install.sh` / `update.sh` 与发布流程无需改动。开发服务器换成 Vite（`npm run dev`，端口 5173，`/api` 照旧反代到 `:8787`）。构建期变量改用 `VITE_MOCK` / `VITE_SSE_BASE`，旧名 `NEXT_PUBLIC_MOCK` / `NEXT_PUBLIC_SSE_BASE` 仍然有效。
+- **前端框架从 Next.js 换成 TanStack Start**：仍以 SPA 模式构建成纯静态站点，产物照旧输出到 `web/out` 并内嵌进 Go 二进制，`build.sh` / `install.sh` / `update.sh` 与发布流程无需改动。开发服务器换成 Vite（`npm run dev`，端口 5173，`/api` 照旧反代到 `:8787`）。构建期变量改名为 `VITE_MOCK` / `VITE_SSE_BASE`（原 `NEXT_PUBLIC_MOCK` / `NEXT_PUBLIC_SSE_BASE`）。
 
 ## [0.3.15] - 2026-10-07
 

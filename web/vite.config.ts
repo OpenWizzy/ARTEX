@@ -9,9 +9,6 @@ import { defineConfig } from "vite";
 const backend = process.env.AUTOPENTEST_API ?? "http://localhost:8787";
 
 export default defineConfig({
-  // VITE_* is the convention; NEXT_PUBLIC_* is still read so deployments set up
-  // for the Next.js build (e.g. the Vercel demo's NEXT_PUBLIC_MOCK=1) keep working.
-  envPrefix: ["VITE_", "NEXT_PUBLIC_"],
   // Vite 8 resolves the tsconfig.json path aliases (`@/*`) itself.
   resolve: { tsconfigPaths: true },
   server: {
