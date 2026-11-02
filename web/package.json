@@ -6,6 +6,7 @@
   "scripts": {
     "predev": "lingui compile",
     "dev": "vite dev --port 5173",
+    "dev:mock": "npm run dev -- --mode mock",
     "prebuild": "lingui compile",
     "build": "vite build",
     "build:static": "npm run build",
@@ -20,7 +21,9 @@
     "generate:presets": "node --experimental-strip-types src/scripts/generate-theme-presets.ts"
   },
   "lint-staged": {
-    "*.{js,ts,jsx,tsx}": ["biome check --write --no-errors-on-unmatched"]
+    "*.{js,ts,jsx,tsx}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
   },
   "dependencies": {
     "@antv/g6": "^5.1.1",

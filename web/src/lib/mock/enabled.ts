@@ -1,3 +1,3 @@
-// Mock 开关。构建期注入的公开变量（VITE_ 前缀才在浏览器可读）。
-// 构建时设 VITE_MOCK=1 即整站走 mock、无需后端（没有后端时预览界面用）。
-export const MOCK = import.meta.env.VITE_MOCK === "1";
+// Mock 开关：用 `npm run dev:mock` 启动（Vite 的 mock 模式）时整站走模拟数据，
+// 不需要后端，用来在没有后端时预览界面。
+export const MOCK = import.meta.env.MODE === "mock";

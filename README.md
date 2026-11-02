@@ -286,7 +286,7 @@ server {
 - 后端：`go run ./cmd/artex`（不带 `-tags embedui` 则不内嵌前端）
 - 前端：`cd web && npm run dev`（`/api` 反代到后端，带热更新）
 - 测试：`go test ./...`
-- Mock 预览（无后端）：`cd web && VITE_MOCK=1 npm run dev`
+- Mock 预览（无后端）：`cd web && npm run dev:mock`
 
 ---
 

@@ -1,4 +1,4 @@
-// Rich mock dataset for the demo build (VITE_MOCK=1). Shapes track the
+// Rich mock dataset for mock mode (`npm run dev:mock`). Shapes track the
 // current backend contract in lib/api.ts + lib/types.ts. All data is static and
 // self-consistent (one company "Acme", a few tasks, findings, exploration graph,
 // sessions/activity, traffic, agents, etc.) so every page looks populated.
