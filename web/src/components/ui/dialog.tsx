@@ -1,5 +1,4 @@
-"use client"
-
+import { Trans } from "@lingui/react/macro"
 import * as React from "react"
 import { Dialog as DialogPrimitive } from "radix-ui"
 
@@ -89,7 +88,7 @@ function DialogContent({
             >
               <XIcon
               />
-              <span className="sr-only">Close</span>
+              <span className="sr-only"><Trans>Close</Trans></span>
             </Button>
           </DialogPrimitive.Close>
         )}
@@ -128,7 +127,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+          <Button variant="outline"><Trans>Close</Trans></Button>
         </DialogPrimitive.Close>
       )}
     </div>

@@ -1,5 +1,3 @@
-"use client";
-
 import { useEffect, useState } from "react";
 
 import { auth, type CurrentUser } from "@/lib/auth";

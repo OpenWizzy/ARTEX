@@ -3,7 +3,7 @@
 # 运行镜像（不在镜像里编译）：只装常用工具，放入**预编译好的 Linux 单二进制**。
 # 二进制由 CI 的 binaries job 交叉编译（纯 Go、无 QEMU），按目标架构放在
 # 构建上下文的 dist/<TARGETARCH>/artex。这样多架构构建时 arm64 只需模拟 apt 层，
-# 不再模拟 Next/Go 编译，速度快得多。
+# 不再模拟前端/Go 编译，速度快得多。
 #
 # 本地手动构建镜像时，先自行准备二进制：
 #   cd web && npm run build:static && cd ..

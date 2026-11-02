@@ -1,5 +1,3 @@
-"use client";
-
 import { createContext, useContext, useEffect, useRef, useState } from "react";
 
 import { type StoreApi, useStore } from "zustand";

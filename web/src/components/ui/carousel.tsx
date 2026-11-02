@@ -1,5 +1,4 @@
-"use client"
-
+import { Trans } from "@lingui/react/macro"
 import * as React from "react"
 import useEmblaCarousel, {
   type UseEmblaCarouselType,
@@ -196,7 +195,7 @@ function CarouselPrevious({
       {...props}
     >
       <ChevronLeftIcon />
-      <span className="sr-only">Previous slide</span>
+      <span className="sr-only"><Trans>Previous slide</Trans></span>
     </Button>
   )
 }
@@ -226,7 +225,7 @@ function CarouselNext({
       {...props}
     >
       <ChevronRightIcon />
-      <span className="sr-only">Next slide</span>
+      <span className="sr-only"><Trans>Next slide</Trans></span>
     </Button>
   )
 }

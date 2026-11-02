@@ -1,6 +1,10 @@
 // Centralised status → color/label semantics, reused across the whole app.
 // Spec §8.3: 意图 / 覆盖 / 任务 / 严重度 each have a consistent color set.
 
+import { msg } from "@lingui/core/macro";
+
+import { tr } from "@/lib/i18n";
+
 export type Tone = "neutral" | "blue" | "green" | "amber" | "red" | "rose" | "violet" | "slate";
 
 export const toneClasses: Record<Tone, string> = {
@@ -32,81 +36,306 @@ interface StatusMeta {
 }
 
 const intent: Record<string, StatusMeta> = {
-  open: { label: "待领", tone: "slate" },
-  running: { label: "执行中", tone: "blue" },
-  paused: { label: "已暂停", tone: "amber" },
-  done: { label: "已完成", tone: "green" },
+  open: {
+    get label() {
+      return tr(msg`Unclaimed`);
+    },
+    tone: "slate",
+  },
+  running: {
+    get label() {
+      return tr(msg({ message: "Running", context: "intent status" }));
+    },
+    tone: "blue",
+  },
+  paused: {
+    get label() {
+      return tr(msg`Paused`);
+    },
+    tone: "amber",
+  },
+  done: {
+    get label() {
+      return tr(msg`Completed`);
+    },
+    tone: "green",
+  },
   // blocked = 模型/API/网络故障重试用尽，这条意图基本没真正探成（非目标拦截）。
-  blocked: { label: "执行出错", tone: "red" },
+  blocked: {
+    get label() {
+      return tr(msg`Errored`);
+    },
+    tone: "red",
+  },
   // exhausted = 达到步数/时间预算被中途掐断、只写回部分结果（非方向已探尽）。
-  exhausted: { label: "预算耗尽", tone: "violet" },
+  exhausted: {
+    get label() {
+      return tr(msg`Budget exhausted`);
+    },
+    tone: "violet",
+  },
   // stopped = 历史软删除状态（保留,历史数据）。
-  stopped: { label: "已停止", tone: "slate" },
+  stopped: {
+    get label() {
+      return tr(msg`Stopped`);
+    },
+    tone: "slate",
+  },
   // deleted = 用户假删除了该意图（保留节点与血缘，删除原因见 delete_reason 字段）。
-  deleted: { label: "已删除", tone: "slate" },
+  deleted: {
+    get label() {
+      return tr(msg`Deleted`);
+    },
+    tone: "slate",
+  },
 };
 
 const task: Record<string, StatusMeta> = {
-  created: { label: "已创建", tone: "slate" },
-  queued: { label: "排队中", tone: "amber" },
-  running: { label: "运行中", tone: "blue" },
-  paused: { label: "已暂停", tone: "amber" },
-  done: { label: "已完成", tone: "green" },
-  failed: { label: "失败", tone: "red" },
-  timeout: { label: "已超时", tone: "amber" },
+  created: {
+    get label() {
+      return tr(msg`Created`);
+    },
+    tone: "slate",
+  },
+  queued: {
+    get label() {
+      return tr(msg`Queued`);
+    },
+    tone: "amber",
+  },
+  running: {
+    get label() {
+      return tr(msg({ message: "Running", context: "task status" }));
+    },
+    tone: "blue",
+  },
+  paused: {
+    get label() {
+      return tr(msg`Paused`);
+    },
+    tone: "amber",
+  },
+  done: {
+    get label() {
+      return tr(msg`Completed`);
+    },
+    tone: "green",
+  },
+  failed: {
+    get label() {
+      return tr(msg`Failed`);
+    },
+    tone: "red",
+  },
+  timeout: {
+    get label() {
+      return tr(msg`Timed out`);
+    },
+    tone: "amber",
+  },
 };
 
 const severity: Record<string, StatusMeta> = {
-  critical: { label: "严重", tone: "rose" },
-  high: { label: "高危", tone: "red" },
-  medium: { label: "中危", tone: "amber" },
-  low: { label: "低危", tone: "slate" },
+  critical: {
+    get label() {
+      return tr(msg`Critical`);
+    },
+    tone: "rose",
+  },
+  high: {
+    get label() {
+      return tr(msg`High`);
+    },
+    tone: "red",
+  },
+  medium: {
+    get label() {
+      return tr(msg`Medium`);
+    },
+    tone: "amber",
+  },
+  low: {
+    get label() {
+      return tr(msg`Low`);
+    },
+    tone: "slate",
+  },
 };
 
 const finding: Record<string, StatusMeta> = {
-  pending: { label: "待处理", tone: "amber" },
-  in_progress: { label: "处理中", tone: "blue" },
-  confirmed: { label: "已确认", tone: "red" },
-  resolved: { label: "已处理", tone: "green" },
-  fixed: { label: "已修复", tone: "green" },
-  false_positive: { label: "误报", tone: "slate" },
-  ignored: { label: "忽略", tone: "neutral" },
-  duplicate: { label: "重复", tone: "neutral" },
-  risk_accepted: { label: "风险接受", tone: "violet" },
+  pending: {
+    get label() {
+      return tr(msg({ message: "Pending", context: "finding status" }));
+    },
+    tone: "amber",
+  },
+  in_progress: {
+    get label() {
+      return tr(msg`In progress`);
+    },
+    tone: "blue",
+  },
+  confirmed: {
+    get label() {
+      return tr(msg({ message: "Confirmed", context: "finding status" }));
+    },
+    tone: "red",
+  },
+  resolved: {
+    get label() {
+      return tr(msg`Resolved`);
+    },
+    tone: "green",
+  },
+  fixed: {
+    get label() {
+      return tr(msg`Fixed`);
+    },
+    tone: "green",
+  },
+  false_positive: {
+    get label() {
+      return tr(msg`False positive`);
+    },
+    tone: "slate",
+  },
+  ignored: {
+    get label() {
+      return tr(msg`Ignored`);
+    },
+    tone: "neutral",
+  },
+  duplicate: {
+    get label() {
+      return tr(msg`Duplicate`);
+    },
+    tone: "neutral",
+  },
+  risk_accepted: {
+    get label() {
+      return tr(msg`Risk accepted`);
+    },
+    tone: "violet",
+  },
 };
 
 const engine: Record<string, StatusMeta> = {
-  exploring: { label: "探索中", tone: "blue" },
-  paused: { label: "已暂停", tone: "amber" },
-  stalled: { label: "停滞", tone: "red" },
-  idle: { label: "空闲", tone: "neutral" },
+  exploring: {
+    get label() {
+      return tr(msg`Exploring`);
+    },
+    tone: "blue",
+  },
+  paused: {
+    get label() {
+      return tr(msg`Paused`);
+    },
+    tone: "amber",
+  },
+  stalled: {
+    get label() {
+      return tr(msg`Stalled`);
+    },
+    tone: "red",
+  },
+  idle: {
+    get label() {
+      return tr(msg`Idle`);
+    },
+    tone: "neutral",
+  },
 };
 
 const goal: Record<string, StatusMeta> = {
-  open: { label: "进行中", tone: "blue" },
-  met: { label: "已达成", tone: "green" },
-  abandoned: { label: "已放弃", tone: "slate" },
+  open: {
+    get label() {
+      return tr(msg({ message: "In progress", context: "goal status" }));
+    },
+    tone: "blue",
+  },
+  met: {
+    get label() {
+      return tr(msg`Met`);
+    },
+    tone: "green",
+  },
+  abandoned: {
+    get label() {
+      return tr(msg`Abandoned`);
+    },
+    tone: "slate",
+  },
 };
 
 const audit: Record<string, StatusMeta> = {
-  allow: { label: "放行", tone: "green" },
-  block: { label: "拦截", tone: "red" },
+  allow: {
+    get label() {
+      return tr(msg`Pass through`);
+    },
+    tone: "green",
+  },
+  block: {
+    get label() {
+      return tr(msg`Block`);
+    },
+    tone: "red",
+  },
 };
 
 const node: Record<string, StatusMeta> = {
-  observed: { label: "观测", tone: "slate" },
-  confirmed: { label: "确认", tone: "green" },
-  tombstoned: { label: "废弃", tone: "neutral" },
+  observed: {
+    get label() {
+      return tr(msg`Observed`);
+    },
+    tone: "slate",
+  },
+  confirmed: {
+    get label() {
+      return tr(msg({ message: "Confirmed", context: "node status" }));
+    },
+    tone: "green",
+  },
+  tombstoned: {
+    get label() {
+      return tr(msg`Tombstoned`);
+    },
+    tone: "neutral",
+  },
 };
 
 // 推送投递状态。sending 用 blue 而不是 amber：它不是「有问题」，
 // 而是「已被领取、正在发」，与 pending 的等待语义要能区分开。
 const delivery: Record<string, StatusMeta> = {
-  pending: { label: "待发送", tone: "amber" },
-  sending: { label: "发送中", tone: "blue" },
-  sent: { label: "已送达", tone: "green" },
-  failed: { label: "失败", tone: "red" },
-  skipped: { label: "已跳过", tone: "neutral" },
+  pending: {
+    get label() {
+      return tr(msg({ message: "Pending", context: "delivery status" }));
+    },
+    tone: "amber",
+  },
+  sending: {
+    get label() {
+      return tr(msg`Sending`);
+    },
+    tone: "blue",
+  },
+  sent: {
+    get label() {
+      return tr(msg`Delivered`);
+    },
+    tone: "green",
+  },
+  failed: {
+    get label() {
+      return tr(msg`Failed`);
+    },
+    tone: "red",
+  },
+  skipped: {
+    get label() {
+      return tr(msg`Skipped`);
+    },
+    tone: "neutral",
+  },
 };
 
 const maps = {

@@ -1,7 +1,6 @@
-"use client";
-
 import { useEffect, useRef } from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
@@ -38,6 +37,7 @@ export function TablePagination({
   onPageSizeChange,
   pageSizeOptions = [10, 20, 50],
 }: TablePaginationProps) {
+  const { t } = useLingui();
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
   const safePage = Math.min(Math.max(1, page), totalPages);
   const from = total === 0 ? 0 : (safePage - 1) * pageSize + 1;
@@ -64,13 +64,19 @@ export function TablePagination({
             ))}
           </SelectContent>
         </Select>
-        <span>条/页</span>
+        <span>
+          <Trans>/ page</Trans>
+        </span>
         {total > 0 ? (
           <span className="tabular-nums">
-            {from}–{to} / 共 {total} 条
+            <Trans>
+              {from}–{to} of {total}
+            </Trans>
           </span>
         ) : (
-          <span>共 0 条</span>
+          <span>
+            <Trans>0 total</Trans>
+          </span>
         )}
       </div>
 
@@ -83,7 +89,7 @@ export function TablePagination({
                 size="icon-sm"
                 disabled={safePage === 1}
                 onClick={() => onPageChange(safePage - 1)}
-                aria-label="上一页"
+                aria-label={t`Previous page`}
               >
                 <ChevronLeftIcon className="size-4" />
               </Button>
@@ -112,7 +118,7 @@ export function TablePagination({
                 size="icon-sm"
                 disabled={safePage === totalPages}
                 onClick={() => onPageChange(safePage + 1)}
-                aria-label="下一页"
+                aria-label={t`Next page`}
               >
                 <ChevronRightIcon className="size-4" />
               </Button>

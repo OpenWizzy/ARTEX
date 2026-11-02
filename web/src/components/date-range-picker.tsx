@@ -1,7 +1,6 @@
-"use client";
-
 import * as React from "react";
 
+import { useLingui } from "@lingui/react/macro";
 import { format, subDays } from "date-fns";
 import type { DateRange } from "react-day-picker";
 
@@ -15,6 +14,7 @@ interface DateRangePickerProps {
 }
 
 export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
+  const { t } = useLingui();
   const [open, setOpen] = React.useState(false);
   const [internalDateRange, setInternalDateRange] = React.useState<DateRange | undefined>(() => {
     const to = new Date();
@@ -22,7 +22,7 @@ export function DateRangePicker({ value, onChange }: DateRangePickerProps) {
     return { from, to };
   });
   const dateRange = value ?? internalDateRange;
-  let dateRangeLabel = "Select date";
+  let dateRangeLabel = t`Select date`;
 
   if (dateRange?.from) {
     dateRangeLabel = format(dateRange.from, "d MMM yyyy");

@@ -1,3 +1,4 @@
+import { Trans } from "@lingui/react/macro"
 import * as React from "react"
 import { Slot } from "radix-ui"
 
@@ -106,7 +107,7 @@ function BreadcrumbEllipsis({
     >
       <MoreHorizontalIcon
       />
-      <span className="sr-only">More</span>
+      <span className="sr-only"><Trans>More</Trans></span>
     </span>
   )
 }

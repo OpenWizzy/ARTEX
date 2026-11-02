@@ -1,8 +1,6 @@
-"use client";
-
 import * as React from "react";
 
-import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage.client";
+import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 
 export type SortDirection = "asc" | "desc";
 

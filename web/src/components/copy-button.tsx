@@ -1,7 +1,6 @@
-"use client";
-
 import * as React from "react";
 
+import { useLingui } from "@lingui/react/macro";
 import { CheckIcon, CopyIcon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -23,14 +22,17 @@ type CopyButtonProps = {
 // 下自动降级(见 copyText)。
 export function CopyButton({
   text,
-  successMessage = "已复制",
-  label = "复制",
+  successMessage,
+  label,
   size = "sm",
   variant = "outline",
   className,
 }: CopyButtonProps) {
+  const { t } = useLingui();
   const [copied, setCopied] = React.useState(false);
   const timer = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const resolvedSuccess = successMessage ?? t`Copied`;
+  const resolvedLabel = label ?? t`Copy`;
 
   React.useEffect(() => {
     return () => {
@@ -43,25 +45,18 @@ export function CopyButton({
     const ok = await copyText(text);
     if (ok) {
       setCopied(true);
-      toast.success(successMessage);
+      toast.success(resolvedSuccess);
       if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => setCopied(false), 1500);
     } else {
-      toast.error("复制失败，请手动选择文本复制");
+      toast.error(t`Copy failed, please select and copy the text manually`);
     }
   }
 
   return (
-    <Button
-      type="button"
-      size={size}
-      variant={variant}
-      className={cn(className)}
-      disabled={!text}
-      onClick={handleCopy}
-    >
+    <Button type="button" size={size} variant={variant} className={cn(className)} disabled={!text} onClick={handleCopy}>
       {copied ? <CheckIcon /> : <CopyIcon />}
-      {label}
+      {resolvedLabel}
     </Button>
   );
 }

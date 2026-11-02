@@ -11,9 +11,8 @@ __pycache__/
 
 # frontend
 web/node_modules/
-web/.next/
+web/dist/
 web/tsconfig.tsbuildinfo
-web/next-env.d.ts
 *.local
 
 # development tools

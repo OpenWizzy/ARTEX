@@ -1,3 +1,4 @@
+import { msg } from "@lingui/core/macro";
 import {
   Activity,
   Ban,
@@ -22,6 +23,8 @@ import {
   Terminal,
   Wrench,
 } from "lucide-react";
+
+import { tr } from "@/lib/i18n";
 
 export type NavBadge = "new" | "soon";
 
@@ -64,35 +67,158 @@ export interface NavGroup {
 export const sidebarItems: NavGroup[] = [
   {
     id: 1,
-    label: "功能",
+    get label() {
+      return tr(msg`Features`);
+    },
     items: [
-      { id: "dashboard", title: "仪表盘", url: "/dashboard", icon: LayoutDashboard },
-      { id: "chat", title: "对话", url: "/chat", icon: MessageSquare },
-      { id: "tasks", title: "任务", url: "/function/tasks", icon: Target },
-      { id: "findings", title: "发现", url: "/function/findings", icon: Bug },
-      { id: "traffic", title: "流量", url: "/function/traffic", icon: Activity },
-      { id: "commands", title: "工具执行", url: "/function/commands", icon: Terminal },
-      { id: "llm-records", title: "LLM 录制", url: "/function/llm-records", icon: Radio },
-      { id: "assets", title: "资产", url: "/function/assets", icon: Network },
-      { id: "sync", title: "资产同步", url: "/function/sync", icon: FolderSync },
-      { id: "workspace", title: "工作空间", url: "/function/workspace", icon: FolderOpen },
+      {
+        id: "dashboard",
+        get title() {
+          return tr(msg`Dashboard`);
+        },
+        url: "/dashboard",
+        icon: LayoutDashboard,
+      },
+      {
+        id: "chat",
+        get title() {
+          return tr(msg`Conversation`);
+        },
+        url: "/chat",
+        icon: MessageSquare,
+      },
+      {
+        id: "tasks",
+        get title() {
+          return tr(msg`Tasks`);
+        },
+        url: "/function/tasks",
+        icon: Target,
+      },
+      {
+        id: "findings",
+        get title() {
+          return tr(msg`Findings`);
+        },
+        url: "/function/findings",
+        icon: Bug,
+      },
+      {
+        id: "traffic",
+        get title() {
+          return tr(msg`Traffic`);
+        },
+        url: "/function/traffic",
+        icon: Activity,
+      },
+      {
+        id: "commands",
+        get title() {
+          return tr(msg`Tool runs`);
+        },
+        url: "/function/commands",
+        icon: Terminal,
+      },
+      {
+        id: "llm-records",
+        get title() {
+          return tr(msg`LLM recording`);
+        },
+        url: "/function/llm-records",
+        icon: Radio,
+      },
+      {
+        id: "assets",
+        get title() {
+          return tr(msg`Assets`);
+        },
+        url: "/function/assets",
+        icon: Network,
+      },
+      {
+        id: "sync",
+        get title() {
+          return tr(msg`Asset sync`);
+        },
+        url: "/function/sync",
+        icon: FolderSync,
+      },
+      {
+        id: "workspace",
+        get title() {
+          return tr(msg`Workspace`);
+        },
+        url: "/function/workspace",
+        icon: FolderOpen,
+      },
     ],
   },
   {
     id: 2,
-    label: "系统",
+    get label() {
+      return tr(msg`System`);
+    },
     items: [
       { id: "llm", title: "LLM", url: "/system/llm", icon: Brain },
       { id: "agents", title: "Agent", url: "/system/agents", icon: Bot },
       { id: "mcp", title: "MCP", url: "/system/mcp", icon: Plug },
       { id: "skills", title: "Skill", url: "/system/skills", icon: Sparkles },
-      { id: "tools", title: "工具", url: "/system/tools", icon: Wrench },
-      { id: "notify", title: "通知推送", url: "/system/notify", icon: BellRing },
-      { id: "intercept", title: "拦截规则", url: "/system/intercept", icon: ShieldAlert },
-      { id: "asset-intercept", title: "资产拦截", url: "/system/intercept/assets", icon: Ban },
-      { id: "approvals", title: "审批记录", url: "/system/intercept/approvals", icon: ClipboardList },
-      { id: "logs", title: "日志", url: "/system/logs", icon: ScrollText },
-      { id: "settings", title: "系统配置", url: "/system/settings", icon: Settings2 },
+      {
+        id: "tools",
+        get title() {
+          return tr(msg`Tools`);
+        },
+        url: "/system/tools",
+        icon: Wrench,
+      },
+      {
+        id: "notify",
+        get title() {
+          return tr(msg`Notifications`);
+        },
+        url: "/system/notify",
+        icon: BellRing,
+      },
+      {
+        id: "intercept",
+        get title() {
+          return tr(msg`Intercept rules`);
+        },
+        url: "/system/intercept",
+        icon: ShieldAlert,
+      },
+      {
+        id: "asset-intercept",
+        get title() {
+          return tr(msg`Asset intercept`);
+        },
+        url: "/system/intercept/assets",
+        icon: Ban,
+      },
+      {
+        id: "approvals",
+        get title() {
+          return tr(msg`Approvals`);
+        },
+        url: "/system/intercept/approvals",
+        icon: ClipboardList,
+      },
+      {
+        id: "logs",
+        get title() {
+          return tr(msg`Logs`);
+        },
+        url: "/system/logs",
+        icon: ScrollText,
+      },
+      {
+        id: "settings",
+        get title() {
+          return tr(msg`System settings`);
+        },
+        url: "/system/settings",
+        icon: Settings2,
+      },
     ],
   },
 ];

@@ -1,12 +1,13 @@
-"use client";
-
 import * as React from "react";
 
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { PlusIcon, Trash2Icon } from "lucide-react";
 
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { NativeSelect, NativeSelectOption } from "@/components/ui/native-select";
+import { tr } from "@/lib/i18n";
 import type { AssetInterceptKind, AssetInterceptRuleInput } from "@/lib/types";
 
 // 用 NativeSelect（原生 <select>）而非 shadcn Select：这个编辑器会用在 Sheet 抽屉内，
@@ -16,13 +17,55 @@ export const ASSET_INTERCEPT_KIND_OPTIONS: {
   label: string;
   placeholder: string;
 }[] = [
-  { value: "exact_domain", label: "域名(全等)", placeholder: "example.gov.cn" },
-  { value: "exact_ip", label: "IP(全等)", placeholder: "203.0.113.10" },
-  { value: "exact_url", label: "URL(全等)", placeholder: "https://example.com/login" },
-  { value: "fuzzy_domain", label: "域名(模糊)", placeholder: ".gov.cn" },
-  { value: "fuzzy_ip", label: "IP(模糊)", placeholder: "203.0.113." },
-  { value: "fuzzy_url", label: "URL(模糊)", placeholder: "/admin" },
-  { value: "cidr", label: "CIDR 网段", placeholder: "192.168.0.0/16" },
+  {
+    value: "exact_domain",
+    get label() {
+      return tr(msg`Domain (exact)`);
+    },
+    placeholder: "example.gov.cn",
+  },
+  {
+    value: "exact_ip",
+    get label() {
+      return tr(msg`IP (exact)`);
+    },
+    placeholder: "203.0.113.10",
+  },
+  {
+    value: "exact_url",
+    get label() {
+      return tr(msg`URL (exact)`);
+    },
+    placeholder: "https://example.com/login",
+  },
+  {
+    value: "fuzzy_domain",
+    get label() {
+      return tr(msg`Domain (fuzzy)`);
+    },
+    placeholder: ".gov.cn",
+  },
+  {
+    value: "fuzzy_ip",
+    get label() {
+      return tr(msg`IP (fuzzy)`);
+    },
+    placeholder: "203.0.113.",
+  },
+  {
+    value: "fuzzy_url",
+    get label() {
+      return tr(msg`URL (fuzzy)`);
+    },
+    placeholder: "/admin",
+  },
+  {
+    value: "cidr",
+    get label() {
+      return tr(msg`CIDR range`);
+    },
+    placeholder: "192.168.0.0/16",
+  },
 ];
 
 // AssetInterceptRulesEditor 是「拦截/允许规则」的受控多行编辑区（拦截block/允许allow +
@@ -34,6 +77,7 @@ export function AssetInterceptRulesEditor({
   value: AssetInterceptRuleInput[];
   onChange: (v: AssetInterceptRuleInput[]) => void;
 }) {
+  const { t } = useLingui();
   function update(i: number, patch: Partial<AssetInterceptRuleInput>) {
     onChange(value.map((r, idx) => (idx === i ? { ...r, ...patch } : r)));
   }
@@ -56,8 +100,8 @@ export function AssetInterceptRulesEditor({
               value={r.action}
               onChange={(e) => update(i, { action: e.target.value as "block" | "allow" })}
             >
-              <NativeSelectOption value="block">拦截</NativeSelectOption>
-              <NativeSelectOption value="allow">允许</NativeSelectOption>
+              <NativeSelectOption value="block">{t`Block`}</NativeSelectOption>
+              <NativeSelectOption value="allow">{t`Allow`}</NativeSelectOption>
             </NativeSelect>
             <NativeSelect
               size="sm"
@@ -79,7 +123,7 @@ export function AssetInterceptRulesEditor({
             />
             <Input
               className="w-[120px] shrink-0"
-              placeholder="备注(可选)"
+              placeholder={t`Note (optional)`}
               value={r.note}
               onChange={(e) => update(i, { note: e.target.value })}
             />
@@ -96,7 +140,7 @@ export function AssetInterceptRulesEditor({
         );
       })}
       <Button type="button" size="sm" variant="outline" className="w-fit" onClick={add}>
-        <PlusIcon className="size-4" /> 添加一条
+        <PlusIcon className="size-4" /> <Trans>Add one</Trans>
       </Button>
     </div>
   );

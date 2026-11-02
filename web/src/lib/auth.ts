@@ -1,3 +1,5 @@
+import { MOCK } from "@/lib/mock/enabled";
+
 const TOKEN_KEY = "artex_token";
 const COOKIE_MAX_AGE = 7 * 24 * 60 * 60; // 7 天（秒）
 
@@ -14,12 +16,12 @@ export const auth = {
   getToken(): string | null {
     if (typeof window === "undefined") return null;
     // Mock demo：无真实登录，返回一个假 token 让路由守卫放行、直接进主界面。
-    return localStorage.getItem(TOKEN_KEY) ?? (process.env.NEXT_PUBLIC_MOCK === "1" ? "mock-demo" : null);
+    return localStorage.getItem(TOKEN_KEY) ?? (MOCK ? "mock-demo" : null);
   },
 
   setToken(token: string): void {
     localStorage.setItem(TOKEN_KEY, token);
-    // 同步写 cookie，供 Next.js middleware 服务端读取
+    // 同步写 cookie（与 localStorage 保持一致）
     document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)}; path=/; max-age=${COOKIE_MAX_AGE}; SameSite=Lax`;
   },
 
@@ -44,3 +46,14 @@ export const auth = {
     }
   },
 };
+
+/**
+ * The console's sign-in gate (routes/_main.tsx and its /$lang twin). No token →
+ * the caller sends the visitor to /login. A stale cookie is cleared on the way
+ * so cookie and localStorage never disagree.
+ */
+export function isSignedIn(): boolean {
+  if (auth.getToken()) return true;
+  auth.clearToken();
+  return false;
+}

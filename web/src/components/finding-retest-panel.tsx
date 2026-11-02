@@ -1,11 +1,11 @@
-"use client";
-
 import * as React from "react";
 
-import Link from "next/link";
-
+import type { MessageDescriptor } from "@lingui/core";
+import { msg } from "@lingui/core/macro";
+import { Trans, useLingui } from "@lingui/react/macro";
 import { RotateCcwIcon } from "lucide-react";
 
+import { LocaleLink } from "@/components/common/locale-link";
 import { FindingRetestDialog } from "@/components/finding-retest-dialog";
 import { Markdown } from "@/components/markdown";
 import { Alert, AlertDescription } from "@/components/ui/alert";
@@ -16,16 +16,21 @@ import { Empty, EmptyDescription, EmptyHeader, EmptyTitle } from "@/components/u
 import { Skeleton } from "@/components/ui/skeleton";
 import { Spinner } from "@/components/ui/spinner";
 import { api } from "@/lib/api";
+import { intlLocale } from "@/lib/i18n";
 import type { FindingRetest } from "@/lib/types";
 
-const statusLabels = {
-  pending: "等待启动",
-  running: "复测中",
-  completed: "已完成",
-  failed: "复测失败",
-  stopped: "已停止",
+const statusLabels: Record<string, MessageDescriptor> = {
+  pending: msg`Waiting to start`,
+  running: msg`Retesting`,
+  completed: msg`Completed`,
+  failed: msg`Retest failed`,
+  stopped: msg`Stopped`,
 };
-const verdictLabels = { reproduced: "仍可复现", fixed: "已修复", inconclusive: "无法确认" };
+const verdictLabels: Record<string, MessageDescriptor> = {
+  reproduced: msg`Still reproducible`,
+  fixed: msg`Fixed`,
+  inconclusive: msg`Inconclusive`,
+};
 
 function active(r: FindingRetest) {
   return r.status === "pending" || r.status === "running";
@@ -42,6 +47,7 @@ export function FindingRetestPanel({
   readOnly?: boolean;
   onCompleted?: () => void;
 }) {
+  const { t, i18n } = useLingui();
   const [items, setItems] = React.useState<FindingRetest[] | null>(null);
   const [error, setError] = React.useState("");
   const [open, setOpen] = React.useState(false);
@@ -84,21 +90,25 @@ export function FindingRetestPanel({
     <Card>
       <CardHeader className="flex flex-row flex-wrap items-start justify-between gap-3">
         <div className="flex flex-col gap-1.5">
-          <CardTitle>漏洞复测</CardTitle>
-          <CardDescription>在独立会话中验证当前状态，保留每次复测的结论与证据。</CardDescription>
+          <CardTitle>
+            <Trans>Vulnerability retest</Trans>
+          </CardTitle>
+          <CardDescription>
+            <Trans>Verify the current status in a separate session, keeping each retest's verdict and evidence.</Trans>
+          </CardDescription>
         </div>
         {running?.conversation_id != null ? (
           <Button asChild variant="outline" size="sm">
-            <Link href={`/chat?c=${running.conversation_id}`} title="查看正在进行的复测会话">
+            <LocaleLink to="/chat" search={{ c: running.conversation_id }} title={t`View the running retest session`}>
               <Spinner data-icon="inline-start" aria-hidden="true" />
-              复测中
-            </Link>
+              <Trans>Retesting</Trans>
+            </LocaleLink>
           </Button>
         ) : null}
         {!running && !readOnly ? (
           <Button size="sm" onClick={() => setOpen(true)} disabled={items === null || !!error}>
             <RotateCcwIcon data-icon="inline-start" />
-            发起复测
+            <Trans>New retest</Trans>
           </Button>
         ) : null}
       </CardHeader>
@@ -106,9 +116,9 @@ export function FindingRetestPanel({
         {error ? (
           <Alert variant="destructive">
             <AlertDescription>
-              加载复测记录失败：{error}
+              <Trans>Failed to load retest records: {error}</Trans>
               <Button variant="outline" size="sm" onClick={() => void load()}>
-                重试
+                <Trans>Retry</Trans>
               </Button>
             </AlertDescription>
           </Alert>
@@ -117,8 +127,12 @@ export function FindingRetestPanel({
         {!error && items?.length === 0 ? (
           <Empty>
             <EmptyHeader>
-              <EmptyTitle>暂无复测记录</EmptyTitle>
-              <EmptyDescription>修复部署完成后，可发起复测并比较新旧证据。</EmptyDescription>
+              <EmptyTitle>
+                <Trans>No retest records yet</Trans>
+              </EmptyTitle>
+              <EmptyDescription>
+                <Trans>After the fix is deployed, you can start a retest and compare old and new evidence.</Trans>
+              </EmptyDescription>
             </EmptyHeader>
           </Empty>
         ) : null}
@@ -130,18 +144,22 @@ export function FindingRetestPanel({
                     variant={item.status === "completed" && item.verdict === "reproduced" ? "destructive" : "secondary"}
                   >
                     {item.status === "completed" && item.verdict
-                      ? verdictLabels[item.verdict]
-                      : statusLabels[item.status]}
+                      ? i18n._(verdictLabels[item.verdict])
+                      : i18n._(statusLabels[item.status])}
                   </Badge>
                   <span className="text-muted-foreground text-xs">
-                    #{item.id} · {new Date(item.created_at).toLocaleString("zh-CN")}
+                    #{item.id} · {new Date(item.created_at).toLocaleString(intlLocale())}
                   </span>
                   {item.conversation_id != null ? (
                     <Button asChild variant="ghost" size="sm" className="ml-auto">
-                      <Link href={`/chat?c=${item.conversation_id}`}>查看会话</Link>
+                      <LocaleLink to="/chat" search={{ c: item.conversation_id }}>
+                        <Trans>View session</Trans>
+                      </LocaleLink>
                     </Button>
                   ) : (
-                    <span className="text-muted-foreground text-xs">会话已删除</span>
+                    <span className="text-muted-foreground text-xs">
+                      <Trans>Session deleted</Trans>
+                    </span>
                   )}
                 </div>
                 {item.status === "completed" && item.summary ? (
@@ -152,12 +170,14 @@ export function FindingRetestPanel({
                 ) : null}
                 {item.notes ? (
                   <p className="whitespace-pre-wrap break-words text-muted-foreground text-xs">
-                    补充说明：{item.notes}
+                    <Trans>Notes: {item.notes}</Trans>
                   </p>
                 ) : null}
                 {item.status === "completed" && item.evidence ? (
                   <details className="min-w-0">
-                    <summary className="cursor-pointer text-sm">复测证据</summary>
+                    <summary className="cursor-pointer text-sm">
+                      <Trans>Retest evidence</Trans>
+                    </summary>
                     <div className="mt-3 overflow-x-auto">
                       <Markdown text={item.evidence} />
                     </div>

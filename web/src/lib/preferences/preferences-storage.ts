@@ -1,7 +1,5 @@
-"use client";
-
-import { setClientCookie } from "../cookie.client";
-import { setLocalStorageValue } from "../local-storage.client";
+import { setClientCookie } from "../cookie";
+import { setLocalStorageValue } from "../local-storage";
 import { PREFERENCE_PERSISTENCE, type PreferenceKey } from "./preferences-config";
 
 export async function persistPreference(key: PreferenceKey, value: string) {

@@ -16,7 +16,7 @@
               "react",
               "react/**",
               ":BLANK_LINE:",
-              "next/**",
+              "@tanstack/**",
               ":BLANK_LINE:",
               ":PACKAGE:",
               ":BLANK_LINE:",
@@ -36,9 +36,9 @@
       "!.github",
       "!.husky",
       "!node_modules",
-      "!.next",
       "!dist",
-      "!out",
+      "!src/routeTree.gen.ts",
+      "!src/locales",
       "!src/components/ui",
       "!src/components/calendar"
     ]
@@ -71,12 +71,8 @@
         "noFloatingPromises": "error",
         "noMisusedPromises": "error"
       },
-      "performance": {
-        "noImgElement": "warn"
-      },
       "style": {
         "noCommonJs": "error",
-        "noHeadElement": "warn",
         "noNamespace": "error",
         "useAsConstAssertion": "error",
         "useSelfClosingElements": "error",
@@ -99,7 +95,6 @@
       }
     },
     "domains": {
-      "next": "recommended",
       "react": "recommended"
     }
   },

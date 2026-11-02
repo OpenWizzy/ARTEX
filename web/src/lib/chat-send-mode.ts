@@ -1,8 +1,9 @@
-"use client";
-
 import * as React from "react";
 
-import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage.client";
+import { msg } from "@lingui/core/macro";
+
+import { tr } from "@/lib/i18n";
+import { getLocalStorageValue, setLocalStorageValue } from "@/lib/local-storage";
 
 // 会话输入框的发送/换行键位。纯前端偏好：只落 localStorage，不入库、不随账号同步，
 // 因此换浏览器需要重设。见 issue #39——0.3.2 把 Ctrl+Enter 发送改成了 Enter 发送，
@@ -13,8 +14,18 @@ export const CHAT_SEND_MODE_KEY = "artex_chat_send_mode";
 export const DEFAULT_CHAT_SEND_MODE: ChatSendMode = "enter";
 
 export const CHAT_SEND_MODE_OPTIONS: { value: ChatSendMode; label: string }[] = [
-  { value: "enter", label: "Enter 发送，Shift+Enter 换行" },
-  { value: "ctrl-enter", label: "Ctrl+Enter 发送，Enter 换行" },
+  {
+    value: "enter",
+    get label() {
+      return tr(msg`Enter to send, Shift+Enter for a new line`);
+    },
+  },
+  {
+    value: "ctrl-enter",
+    get label() {
+      return tr(msg`Ctrl+Enter to send, Enter for a new line`);
+    },
+  },
 ];
 
 function parseMode(raw: string | null): ChatSendMode {

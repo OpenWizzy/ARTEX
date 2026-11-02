@@ -1,7 +1,6 @@
-"use client";
-
 import * as React from "react";
 
+import { Trans, useLingui } from "@lingui/react/macro";
 import { LibraryIcon, PlusIcon, SaveIcon, Settings2Icon, Trash2Icon } from "lucide-react";
 import { toast } from "sonner";
 
@@ -91,6 +90,7 @@ function TaskTemplateManager({
   const [deleting, setDeleting] = React.useState(false);
   const [categories, setCategories] = React.useState<TaskCategory[]>([]);
   const wasOpen = React.useRef(false);
+  const { t } = useLingui();
 
   React.useEffect(() => {
     if (!open) return;
@@ -151,7 +151,7 @@ function TaskTemplateManager({
         .filter((r) => r.pattern !== ""),
     };
     if (!input.name || !input.description || !input.goal) {
-      toast.error("请填写模板名称、描述和目标");
+      toast.error(t`Enter a template name, description, and goal`);
       return;
     }
     setSaving(true);
@@ -161,15 +161,16 @@ function TaskTemplateManager({
         onCreated(created);
         setSelectedID(created.id);
         setDraft(templateDraft(created));
-        toast.success("模板已创建");
+        toast.success(t`Template created`);
       } else {
         const updated = await api.updateTaskTemplate(selectedID, input);
         onUpdated(updated);
         setDraft(templateDraft(updated));
-        toast.success("模板已更新");
+        toast.success(t`Template updated`);
       }
     } catch (error) {
-      toast.error(`保存失败：${(error as Error).message}`);
+      const message = (error as Error).message;
+      toast.error(t`Save failed: ${message}`);
     } finally {
       setSaving(false);
     }
@@ -190,35 +191,46 @@ function TaskTemplateManager({
         startNew();
       }
       setDeleteOpen(false);
-      toast.success("模板已删除");
+      toast.success(t`Template deleted`);
     } catch (error) {
-      toast.error(`删除失败：${(error as Error).message}`);
+      const message = (error as Error).message;
+      toast.error(t`Delete failed: ${message}`);
     } finally {
       setDeleting(false);
     }
   }
 
-  let saveLabel = saving ? "保存中" : "保存修改";
-  if (!saving && selectedID == null) saveLabel = "创建模板";
+  let saveLabel = saving ? t`Saving…` : t`Save changes`;
+  if (!saving && selectedID == null) saveLabel = t`Create template`;
+  const templateName = draft.name || t`Untitled template`;
 
   return (
     <>
       <Sheet open={open} onOpenChange={onOpenChange}>
         <SheetContent className="grid h-full w-full! max-w-none! grid-rows-[auto_minmax(0,1fr)_auto] gap-0 overflow-hidden p-0 sm:w-[48rem]! sm:max-w-[48rem]!">
           <SheetHeader className="border-b px-6 py-5">
-            <SheetTitle>任务模板管理</SheetTitle>
-            <SheetDescription>模板保存描述、目标、分类与任务级拦截/允许规则；修改不会影响已经创建的任务。</SheetDescription>
+            <SheetTitle>
+              <Trans>Manage task templates</Trans>
+            </SheetTitle>
+            <SheetDescription>
+              <Trans>
+                Templates store the description, goal, category, and task-level intercept/allow rules. Changes don't
+                affect tasks that were already created.
+              </Trans>
+            </SheetDescription>
           </SheetHeader>
           <div className="grid min-h-0 overflow-y-auto lg:grid-cols-[15rem_minmax(0,1fr)] lg:overflow-hidden">
             <div className="flex min-h-0 flex-col border-b p-3 lg:border-r lg:border-b-0">
               <Button type="button" variant="outline" className="w-full" onClick={startNew}>
                 <PlusIcon data-icon="inline-start" />
-                新建模板
+                <Trans>New template</Trans>
               </Button>
               <ScrollArea className="mt-2 max-h-44 lg:max-h-none lg:flex-1">
                 <div className="flex flex-col gap-1 pr-2">
                   {templates.length === 0 && (
-                    <p className="px-2 py-6 text-center text-muted-foreground text-sm">暂无模板</p>
+                    <p className="px-2 py-6 text-center text-muted-foreground text-sm">
+                      <Trans>No templates</Trans>
+                    </p>
                   )}
                   {templates.map((template) => (
                     <button
@@ -240,37 +252,45 @@ function TaskTemplateManager({
             <ScrollArea className="min-h-0">
               <FieldGroup className="p-6">
                 <Field>
-                  <FieldLabel htmlFor="task-template-name">模板名称</FieldLabel>
+                  <FieldLabel htmlFor="task-template-name">
+                    <Trans>Template name</Trans>
+                  </FieldLabel>
                   <Input
                     id="task-template-name"
                     value={draft.name}
                     maxLength={120}
-                    placeholder="例如：外部 Web 渗透"
+                    placeholder={t`e.g. External web pentest`}
                     onChange={(event) => updateDraft("name", event.target.value)}
                   />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="task-template-description">描述</FieldLabel>
+                  <FieldLabel htmlFor="task-template-description">
+                    <Trans>Description</Trans>
+                  </FieldLabel>
                   <Textarea
                     id="task-template-description"
                     className="min-h-28"
                     value={draft.description}
-                    placeholder="测试对象与背景"
+                    placeholder={t`What's being tested, and the background`}
                     onChange={(event) => updateDraft("description", event.target.value)}
                   />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="task-template-goal">目标</FieldLabel>
+                  <FieldLabel htmlFor="task-template-goal">
+                    <Trans>Goal</Trans>
+                  </FieldLabel>
                   <Textarea
                     id="task-template-goal"
                     className="min-h-28"
                     value={draft.goal}
-                    placeholder="任务需要达成的目标"
+                    placeholder={t`What the task needs to achieve`}
                     onChange={(event) => updateDraft("goal", event.target.value)}
                   />
                 </Field>
                 <Field>
-                  <FieldLabel htmlFor="task-template-category">任务分类</FieldLabel>
+                  <FieldLabel htmlFor="task-template-category">
+                    <Trans>Task category</Trans>
+                  </FieldLabel>
                   <NativeSelect
                     id="task-template-category"
                     className="w-full"
@@ -279,23 +299,32 @@ function TaskTemplateManager({
                       patchDraft({ categoryID: event.target.value === "" ? null : Number(event.target.value) })
                     }
                   >
-                    <NativeSelectOption value="">未分类</NativeSelectOption>
+                    <NativeSelectOption value="">
+                      <Trans>Uncategorized</Trans>
+                    </NativeSelectOption>
                     {categories.map((c) => (
                       <NativeSelectOption key={c.id} value={String(c.id)}>
                         {c.name}
                       </NativeSelectOption>
                     ))}
                   </NativeSelect>
-                  <FieldDescription>应用模板时预填此分类（可再改）。</FieldDescription>
+                  <FieldDescription>
+                    <Trans>Applying the template pre-fills this category (you can still change it).</Trans>
+                  </FieldDescription>
                 </Field>
                 <Field>
-                  <FieldLabel>任务级拦截 / 允许规则</FieldLabel>
+                  <FieldLabel>
+                    <Trans>Task-level intercept / allow rules</Trans>
+                  </FieldLabel>
                   <AssetInterceptRulesEditor
                     value={draft.interceptRules}
                     onChange={(rules) => patchDraft({ interceptRules: rules })}
                   />
                   <FieldDescription>
-                    应用模板时预填这些任务级规则（拦截/允许，仅对新任务生效，不进全局）。
+                    <Trans>
+                      Applying the template pre-fills these task-level rules (intercept/allow). They apply only to the
+                      new task and are not added to the global rules.
+                    </Trans>
                   </FieldDescription>
                 </Field>
               </FieldGroup>
@@ -305,11 +334,11 @@ function TaskTemplateManager({
             {selectedID != null && (
               <Button type="button" variant="destructive" className="sm:mr-auto" onClick={() => setDeleteOpen(true)}>
                 <Trash2Icon data-icon="inline-start" />
-                删除模板
+                <Trans>Delete template</Trans>
               </Button>
             )}
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              关闭
+              <Trans>Close</Trans>
             </Button>
             <Button type="button" disabled={saving} onClick={() => void save()}>
               {saving ? <Spinner data-icon="inline-start" /> : <SaveIcon data-icon="inline-start" />}
@@ -321,11 +350,17 @@ function TaskTemplateManager({
       <AlertDialog open={deleteOpen} onOpenChange={setDeleteOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>删除模板「{draft.name || "未命名模板"}」？</AlertDialogTitle>
-            <AlertDialogDescription>已由该模板创建的任务不会受到影响。</AlertDialogDescription>
+            <AlertDialogTitle>
+              <Trans>Delete template “{templateName}”?</Trans>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <Trans>Tasks already created from this template won't be affected.</Trans>
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>取消</AlertDialogCancel>
+            <AlertDialogCancel disabled={deleting}>
+              <Trans>Cancel</Trans>
+            </AlertDialogCancel>
             <AlertDialogAction
               variant="destructive"
               disabled={deleting}
@@ -335,7 +370,7 @@ function TaskTemplateManager({
               }}
             >
               {deleting && <Spinner data-icon="inline-start" />}
-              {deleting ? "删除中" : "删除"}
+              {deleting ? t`Deleting…` : t`Delete`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
@@ -371,6 +406,7 @@ export function TaskTemplateControls({
   const [pendingTemplate, setPendingTemplate] = React.useState<TaskTemplate | null>(null);
   const [managerOpen, setManagerOpen] = React.useState(false);
   const [managerSeed, setManagerSeed] = React.useState<TemplateSeed | null>(null);
+  const { t } = useLingui();
 
   const loadTemplates = React.useCallback(async () => {
     setLoading(true);
@@ -378,11 +414,12 @@ export function TaskTemplateControls({
       setTemplates(await api.taskTemplates());
     } catch (error) {
       setTemplates([]);
-      toast.error(`加载模板失败：${(error as Error).message}`);
+      const message = (error as Error).message;
+      toast.error(t`Failed to load templates: ${message}`);
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [t]);
 
   React.useEffect(() => {
     void loadTemplates();
@@ -433,18 +470,21 @@ export function TaskTemplateControls({
     if (selectedTemplateID === id) onSelectedTemplateIDChange(null);
   };
 
-  let pickerPlaceholder = loading ? "正在加载模板" : "暂无任务模板";
-  if (!loading && templates.length > 0) pickerPlaceholder = "搜索并选择任务模板";
+  let pickerPlaceholder = loading ? t`Loading templates…` : t`No task templates`;
+  if (!loading && templates.length > 0) pickerPlaceholder = t`Search and select a task template`;
+  const pendingTemplateName = pendingTemplate?.name ?? "";
 
   return (
     <>
       <Field>
         <div className="flex flex-wrap items-center justify-between gap-2">
-          <FieldLabel htmlFor="task-template-picker">任务模板</FieldLabel>
+          <FieldLabel htmlFor="task-template-picker">
+            <Trans>Task template</Trans>
+          </FieldLabel>
           <div className="flex flex-wrap gap-2">
             <Button type="button" variant="ghost" size="sm" onClick={() => openManager(null)}>
               <Settings2Icon data-icon="inline-start" />
-              管理模板
+              <Trans>Manage templates</Trans>
             </Button>
             <Button
               type="button"
@@ -461,7 +501,7 @@ export function TaskTemplateControls({
               }
             >
               <SaveIcon data-icon="inline-start" />
-              另存为模板
+              <Trans>Save as template</Trans>
             </Button>
           </div>
         </div>
@@ -482,7 +522,9 @@ export function TaskTemplateControls({
             showClear
           />
           <ComboboxContent portalContainer={portalContainer}>
-            <ComboboxEmpty>没有匹配的模板</ComboboxEmpty>
+            <ComboboxEmpty>
+              <Trans>No matching templates</Trans>
+            </ComboboxEmpty>
             <ComboboxList>
               {(template) => (
                 <ComboboxItem key={template.id} value={template}>
@@ -498,7 +540,12 @@ export function TaskTemplateControls({
             </ComboboxList>
           </ComboboxContent>
         </Combobox>
-        <FieldDescription>选择后会复制模板的描述、目标、分类与任务级规则，不与模板保持关联。</FieldDescription>
+        <FieldDescription>
+          <Trans>
+            Selecting a template copies its description, goal, category, and task-level rules. The task isn't linked to
+            the template afterwards.
+          </Trans>
+        </FieldDescription>
       </Field>
 
       <AlertDialog
@@ -511,13 +558,21 @@ export function TaskTemplateControls({
       >
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>使用模板「{pendingTemplate?.name}」？</AlertDialogTitle>
-            <AlertDialogDescription>当前已填写的描述和目标将被模板内容覆盖。</AlertDialogDescription>
+            <AlertDialogTitle>
+              <Trans>Use template “{pendingTemplateName}”?</Trans>
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              <Trans>
+                The description and goal you've already entered will be replaced with the template's content.
+              </Trans>
+            </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>取消</AlertDialogCancel>
+            <AlertDialogCancel>
+              <Trans>Cancel</Trans>
+            </AlertDialogCancel>
             <AlertDialogAction onClick={() => pendingTemplate && applyTemplate(pendingTemplate)}>
-              覆盖并使用
+              <Trans>Replace and use</Trans>
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>

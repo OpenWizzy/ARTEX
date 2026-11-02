@@ -4,6 +4,16 @@
 
 ## [Unreleased]
 
+### 前端
+
+#### 新增的功能
+
+- **界面支持中英双语**：顶栏新增语言切换。中文仍是默认语言，原有地址不变；英文界面在 `/en/` 前缀下（如 `/en/function/tasks`）。文案由 Lingui 管理：代码里写英文源串，中文译文在 `web/src/locales/zh.po`。
+
+#### 变更
+
+- **前端框架从 Next.js 换成 TanStack Start**：仍以 SPA 模式构建成纯静态站点，产物照旧输出到 `web/out` 并内嵌进 Go 二进制，`build.sh` / `install.sh` / `update.sh` 与发布流程无需改动。开发服务器换成 Vite（`npm run dev`，端口 5173，`/api` 照旧反代到 `:8787`）。构建期变量改用 `VITE_MOCK` / `VITE_SSE_BASE`，旧名 `NEXT_PUBLIC_MOCK` / `NEXT_PUBLIC_SSE_BASE` 仍然有效。
+
 ## [0.3.15] - 2026-10-07
 
 ### 拦截
