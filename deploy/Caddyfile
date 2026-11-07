@@ -1,0 +1,20 @@
+{
+	admin off
+}
+
+__ARTEX_SITE__ {
+	encode zstd gzip
+
+	@api path /api /api/*
+	handle @api {
+		reverse_proxy 127.0.0.1:8787 {
+			flush_interval -1
+		}
+	}
+
+	handle {
+		root * /var/www/artex
+		try_files {path} {path}/index.html /index.html
+		file_server
+	}
+}

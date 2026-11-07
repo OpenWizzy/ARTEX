@@ -152,8 +152,8 @@ export async function http<T>(path: string, init?: RequestInit): Promise<T> {
 
 // sseUrl builds a URL for Server-Sent Events streams.
 //
-// Production (static export / Docker): the Go backend serves the web UI *and* the
-// SSE streams on the same port, so we default to a same-origin (relative) URL.
+// Production: Caddy (VPS) or the embedded Go server (release packages) provides
+// the UI and API/SSE on the same origin, so the default is a relative URL.
 // This is what makes reverse-proxy deploys work: a page loaded from
 // https://<domain>/ connects to https://<domain>/api/..., which the proxy forwards
 // to the backend — no need to expose :8787 publicly. Hardcoding :8787 here used to

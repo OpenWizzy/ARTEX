@@ -18,7 +18,7 @@ import (
 // 这里只负责鉴权边界、并发互斥、进度广播，以及把"该退出了"告诉 main。
 //
 // 重启不由本进程完成：暂存好新版本后进程以 selfupdate.ExitRestart 退出，
-// 由守护脚本（start.sh / start.bat，Docker 下是 ENTRYPOINT）重新拉起。
+// 由守护脚本（start.sh / start.bat）重新拉起。
 
 // restartCh 在升级就绪或回滚完成后关闭，main 收到后以 ExitRestart 退出。
 var (
@@ -209,14 +209,10 @@ func (h *updateHub) subscribe() (<-chan updateProgress, func()) {
 // 不如在检查这一步就如实报错。
 func (s *Server) updateCheck(w http.ResponseWriter, r *http.Request) {
 	current := BuildVersion
-	mode := "binary"
-	if selfupdate.InDocker() {
-		mode = "docker"
-	}
 	boot := bootUpdateState()
 	out := map[string]any{
 		"current":     current,
-		"mode":        mode,
+		"mode":        "binary",
 		"os":          runtime.GOOS,
 		"arch":        runtime.GOARCH,
 		"has_backup":  selfupdate.HasBackup(),

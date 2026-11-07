@@ -1,0 +1,20 @@
+[Unit]
+Description=ARTEX Go backend
+Wants=network-online.target
+After=network-online.target
+
+[Service]
+Type=simple
+User=artex
+Group=artex
+WorkingDirectory=/var/lib/artex
+Environment=PATH=/usr/local/bin:/usr/bin:/bin
+EnvironmentFile=/etc/artex/runtime.env
+ExecStart=/opt/artex/artex -addr 127.0.0.1:8787 -proxy 127.0.0.1:8788 -data /var/lib/artex
+Restart=on-failure
+RestartSec=3
+TimeoutStopSec=45
+UMask=0077
+
+[Install]
+WantedBy=multi-user.target

@@ -19,7 +19,7 @@ import { api, sseUrl } from "@/lib/api";
 import type { UpdateCheck, UpdateProgress } from "@/lib/types";
 
 /** 等待新版本上线的最长时间。一次升级要经过三次进程启动（暂存 → 换装 → 新版），
- *  每次都是秒级，三分钟足够覆盖慢磁盘和 Docker 容器重建。 */
+ *  每次都是秒级，三分钟足够覆盖慢磁盘上的换装与重启。 */
 const RESTART_TIMEOUT_MS = 180_000;
 
 function humanSize(n?: number): string {
@@ -142,10 +142,7 @@ export function UpdateCard() {
     if (!info) return;
     const from = info.current;
     const ok = window.confirm(
-      `${t`Update to ${info.latest}?`}\n\n${t`The update restarts the program and interrupts running tasks.`}` +
-        (info.mode === "docker"
-          ? `\n\n${t`Note: an in-container update only replaces the program itself, not the toolchain in the image (playwright / nmap, etc.); if the new version needs new tools, use docker compose pull instead.`}`
-          : ""),
+      `${t`Update to ${info.latest}?`}\n\n${t`The update restarts the program and interrupts running tasks.`}`,
     );
     if (!ok) return;
 
@@ -217,7 +214,7 @@ export function UpdateCard() {
               <Badge variant="outline" className="font-mono">
                 {info.os}/{info.arch}
               </Badge>
-              <Badge variant="outline">{info.mode === "docker" ? "Docker" : t`Standalone`}</Badge>
+              <Badge variant="outline">{t`Standalone`}</Badge>
             </>
           )}
           {info?.latest && (
@@ -282,18 +279,6 @@ export function UpdateCard() {
           <p className="flex items-center gap-2 text-xs text-muted-foreground">
             <CheckCircle2Icon className="size-3.5 text-emerald-600" />
             <Trans>You're on the latest version.</Trans>
-          </p>
-        )}
-
-        {info?.mode === "docker" && info.has_update && (
-          <p className="text-xs text-muted-foreground">
-            <Trans>
-              A Docker update only replaces the program itself, not the toolchain in the image (playwright / nmap,
-              etc.), and after
-              <span className="font-mono"> docker compose up -d </span>
-              rebuilds the container it reverts to the image's bundled version. To upgrade the image too, run
-              <span className="font-mono"> docker compose pull artex &amp;&amp; docker compose up -d artex</span>.
-            </Trans>
           </p>
         )}
 

@@ -19,8 +19,8 @@ export default defineConfig({
   environments: {
     client: {
       build: {
-        // 静态站点输出到 web/out：build.sh / install.sh / update.sh / release.yml
-        // 都从这里拷贝到 server/webui/dist 再内嵌进 Go 二进制。
+        // 静态站点输出到 web/out：VPS 部署由 Caddy 直接提供；
+        // build.sh / release.yml 也可将其内嵌进 Go 二进制。
         // （dist/server 是预渲染外壳页用的服务端包，不发布。）
         outDir: "out",
         // 生产包去掉 console.*（原 next.config 的 compiler.removeConsole）。
@@ -31,9 +31,9 @@ export default defineConfig({
   plugins: [
     tailwindcss(),
     tanstackStart({
-      // 前端以纯静态文件内嵌进 Go 二进制（server/webui/dist），没有 Node 运行时。
+      // 前端生成纯静态文件，由 Caddy 提供或内嵌进 Go 二进制，没有 Node 运行时。
       // SPA 模式只在构建期预渲染外壳页并写成 dist/client/index.html；页面一律在
-      // 浏览器里渲染，Go 侧对未知路径回落到 index.html，交给客户端路由。
+      // 浏览器里渲染，静态服务器对未知路径回落到 index.html，交给客户端路由。
       spa: { enabled: true, prerender: { outputPath: "/index" } },
     }),
     viteReact(),

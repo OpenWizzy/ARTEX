@@ -59,85 +59,94 @@ AI 自主渗透测试系统（Go 后端 + TanStack Start 前端）
 
 ## 安装
 
-> 依赖数据库 **PostgreSQL**；探索需配置 **LLM**（`ANTHROPIC_API_KEY` 或 `OPENAI_API_KEY`，也可在 UI 里配）。
+ARTEX 使用已有 PostgreSQL（Neon 或自建均可），AI 任务的 LLM 可在页面中配置。Linux VPS 部署将 **纯 Go 后端** 与 **TanStack 静态前端** 分别构建；Caddy 提供页面并反代 API/SSE，运行时只需 Go 后端和 Caddy 两个进程，不需要常驻 Node 服务。
 
-### 方式一：一键安装脚本（推荐）
+### Linux VPS：准备，再检查启动
 
-```bash
-git clone https://github.com/Hinln/ARTEX.git
-cd ARTEX
-./install.sh
-```
-
-脚本会：检测 / 自动安装 Docker → 让你选 **① 全部 Docker** 或 **② 本地编译运行**：
-
-- **① 全部 Docker**：填一个 Postgres 密码（可回车随机）→ 自动写 `.env` → `docker compose up -d`。
-- **② 本地运行**：选数据库（连已有 / 用 Docker 起一个）→ 生成 `config.json` → `go` 编译内嵌单二进制 → 启动。
-
-装好后打开 **http://localhost:8787**（首次进入 `/setup` 设置管理员密码）。
-
-### 方式二：Docker Compose（手动）
+支持使用 systemd 的 **Ubuntu 22.04/24.04、Debian 12/13**，x86_64 或 arm64。先准备好一个可连接、可建表的 PostgreSQL 数据库。
 
 ```bash
 git clone https://github.com/Hinln/ARTEX.git
 cd ARTEX
-cp .env.example .env          # 填 POSTGRES_PASSWORD、可选 ANTHROPIC_API_KEY
-docker compose up -d          # 拉取 ghcr.io/openwizzy/artex 镜像 + postgres
-# → http://localhost:8787
+sudo ./setup-vps.sh           # 首次输入数据库连接串；准备环境并构建，不启动应用
+sudo ./start-vps.sh           # 检查全部依赖、数据库、浏览器和端口，通过后启动
 ```
 
-镜像已含常用工具（ripgrep/curl/vim/npm/nmap…）；`./skills` 与 `./data` 以绑定挂载持久化。
-
-远程 MCP 可在系统设置中选择 `http`（Streamable HTTP）或 `sse`（旧版 SSE）。
-旧版 SSE 服务通常使用 `GET /sse` 建立事件流，再通过服务返回的
-`/message?sessionId=...` 接收 JSON-RPC 请求；配置时将 URL 填为 `/sse`，请求头按
-`Authorization=Bearer <token>` 填写。
-
-### 方式三：下载预编译二进制（Releases）
-
-到 [Releases](https://github.com/Hinln/ARTEX/releases) 下载对应平台的 zip，解压后得到 `artex` + `start.sh`（Windows 为 `start.bat`）+ `skills/` + `config.example.json`：
+默认通过 `http://VPS的IP` 访问。使用域名时：
 
 ```bash
-cp config.example.json config.json   # 填好 database 连接
+sudo ./setup-vps.sh --domain artex.example.com
+sudo ./start-vps.sh
+```
+
+将域名解析到 VPS，并允许入站 80/443；Caddy 自动申请 HTTPS 证书。Go API（127.0.0.1:8787）和流量录制代理（127.0.0.1:8788）只监听本机。
+
+`setup-vps.sh` 完成这些工作：
+
+- 安装 Go（版本至少满足 go.mod）、Node.js 24、Python、PostgreSQL 客户端及 nmap、curl、ripgrep、DNS 等命令行工具。
+- 安装 Playwright、Playwright CLI/MCP、Chromium 和浏览器所需系统库；同时安装内置 api-recon skill 的 npm 依赖。
+- 不带 `embedui` 编译 Go 后端，单独构建 TanStack 前端，并安装 Caddy、生成 systemd 单元。
+- 首次将连接串保存到 `/etc/artex/config.json`，后续执行保留该文件和运行数据。
+
+`start-vps.sh` 先检查二进制、前端、用户权限、工具、数据库连通性与建表权限、端口和 Caddy 配置，并以服务用户实际启动一次无头 Chromium。全部通过后才启动或重启服务，最后验证 API 和前端页面。
+
+```bash
+sudo ./start-vps.sh --check-only   # 只检查，不改变服务状态
+sudo journalctl -u artex -u artex-web -f
+sudo systemctl stop artex artex-web
+```
+
+| 内容 | 路径 |
+| --- | --- |
+| Go 二进制 / skills | `/opt/artex/` |
+| 静态前端 | `/var/www/artex/` |
+| 数据库配置 | `/etc/artex/config.json` |
+| Caddy 配置 | `/etc/artex/web/Caddyfile` |
+| 数据、JWT 密钥和浏览器缓存 | `/var/lib/artex/` |
+
+Neon 使用 **Direct connection**（主机名不带 `-pooler`），保留 `sslmode=require`。ARTEX 启动迁移使用会话锁，不能经过事务池；参见 [Neon 连接池说明](https://neon.com/docs/connect/connection-pooling)。自建数据库使用 VPS 可访问的地址，跨机器连接按部署配置 TLS。
+
+`install.sh` 是 `setup-vps.sh` 的兼容入口。准备脚本使用独立的 `artex-web` Caddy 单元，不改已有 Caddy 站点配置；已有 Web 服务占用 80/443 时，启动检查会提示冲突。自定义 skill 如依赖更多工具，需另行安装。
+
+### 下载预编译二进制
+
+到 [Releases](https://github.com/Hinln/ARTEX/releases) 下载对应平台的 zip，包含 `artex`、`start.sh`（Windows 为 `start.bat`）、`skills/` 和 `config.example.json`。此发行包内嵌前端：
+
+```bash
+cp config.example.json config.json   # 填 database.dsn
 ./start.sh                           # → http://localhost:8787
 ```
 
-> 请用 `start.sh` / `start.bat` 启动，而不是直接跑 `./artex`。它是个守护脚本：程序退出后按退出码决定是否重新拉起，**页面上的[一键更新](#方式一页面一键更新推荐)靠它完成换装**。直接运行 `./artex` 时更新完就不会被拉起了。
-> 后台常驻：`nohup ./start.sh >artex.log 2>&1 &`。
+发行包在宿主机调用工具，Python、Node、nmap、Playwright 等按所用功能准备。请用 `start.sh` / `start.bat` 启动，页面一键更新依赖该脚本在程序退出后重新拉起。
 
-### 方式四：从源码编译单二进制
-
-```bash
-# 1) 前端静态导出
-cd web && npm ci && npm run build:static && cd ..
-# 2) 拷进内嵌目录
-cp -r web/out server/webui/dist
-# 3) 编译（-tags embedui 才内嵌前端）
-CGO_ENABLED=0 go build -tags embedui -o artex ./cmd/artex
-./start.sh
-```
-
-### 方式五：构建跨平台 Release 压缩包
-
-`build.sh` 会先构建并嵌入前端，再使用 Go linker 去除调试信息，并将发布文件压缩为 zip。Release 模式默认生成 Linux amd64/arm64、macOS amd64/arm64 和 Windows amd64 的 zip 包：
+### 从源码构建内嵌前端的发行包
 
 ```bash
-./build.sh --release
-# 产物：dist/artex-0.3.3-*.zip
+ARTEX_OUTPUT=./artex ./build.sh       # 当前平台，前端嵌入二进制
+./build.sh --release                 # 多平台 zip
+./build.sh --target linux/amd64      # 指定平台
 ```
 
-UPX 自解压二进制可能与部分 Linux 内核、虚拟化环境或安全策略不兼容，因此默认不启用。可用 `ARTEX_TARGETS` 自定义目标；确认目标运行环境兼容时，可显式传入 `--upx` 进一步缩小二进制：
+VPS 的两个脚本不走内嵌构建流程。`build.sh` 的 Release 默认生成 Linux amd64/arm64、macOS amd64/arm64 和 Windows amd64。默认不启用 UPX，可用 `ARTEX_TARGETS` 自定义目标，或在确认兼容时显式传入 `--upx`。
 
-```bash
-ARTEX_TARGETS=linux/amd64,windows/amd64 ./build.sh --release
-./build.sh --target linux/amd64 --upx
-```
+远程 MCP 可在系统设置中选择 `http`（Streamable HTTP）或 `sse`（旧版 SSE）。旧版 SSE 配置 URL 通常为 `/sse`，认证头按 `Authorization=Bearer <token>` 填写。
 
 ---
 
 ## 更新升级
 
-> 升级只换程序、不动数据：Postgres 数据卷 `pgdata`、`./data`（jwt.key / SQLite 等）、`./skills` 都会保留。**数据库迁移无需手动执行**——`artex` 每次启动会幂等重跑 `schema.sql`（含 `ADD COLUMN` / `CREATE INDEX IF NOT EXISTS`），即“重启即迁移”。升级前仍建议先备份 `./data` 与数据库。
+> 升级保留数据库和运行数据；VPS 数据目录为 `/var/lib/artex/`，发行包默认为可执行文件旁的 `data/`。**数据库迁移无需手动执行**——`artex` 每次启动会幂等重跑 `schema.sql`（含 `ADD COLUMN` / `CREATE INDEX IF NOT EXISTS`），即“重启即迁移”。升级前仍建议先备份 `./data` 与数据库。
+
+### VPS 源码部署
+
+```bash
+git pull --ff-only
+sudo ./setup-vps.sh --skip-deps       # 重新构建后端和静态前端，保留依赖、配置、数据
+sudo ./start-vps.sh                   # 检查后重启，验证 API 和页面
+# sudo ./update.sh 也是上述重新构建步骤的兼容入口
+```
+
+更新会重启后端并中断运行中的任务，请在空闲时进行。VPS 的纯 Go 构建保持开发版本标识，使用上述源码更新流程；下面的页面一键更新面向内嵌前端的发行包。
 
 ### 本仓库的私有 Release 更新源
 
@@ -150,7 +159,7 @@ ARTEX_TARGETS=linux/amd64,windows/amd64 ./build.sh --release
 ./start.sh
 ```
 
-本地直接启动时，`start.sh` 不会自动读取 `.env`；必须将变量导出到进程环境。Docker Compose 部署则可在未纳入 Git 的 `.env` 中填写该变量，并重建 artex 容器；镜像需要包含本分支的更新代码，旧版镜像不会因此切换升级源。
+发行包的 `start.sh` 不会自动读取 `.env`；需将变量导出到进程环境。
 
 需要先在本仓库发布非 draft、非 prerelease 的正式 Release，并附上 `artex-<版本>-<os>-<arch>.zip` 和 `SHA256SUMS`，页面才能提供可安装更新。仓库里只有源码时还不能在线升级。现有 Release 工作流会在推送 `v*` tag 时为当前仓库生成这些附件。
 
@@ -164,48 +173,17 @@ ARTEX_TARGETS=linux/amd64,windows/amd64 ./build.sh --release
 - **随时可回退**：上一版本保留为 `artex.old`，卡片上有「回滚到上一版本」。注意数据库结构不会回退。
 - **更新会中断正在运行的任务**——更新即重启，请在空闲时进行。
 - **开发构建不给更新**：版本号是 `dev` 或 `git describe` 带后缀时禁用，避免正式版覆盖掉本地调试的二进制。
-- **Docker 下只换程序、不换镜像**：镜像里的 playwright / nmap 等工具链不会跟着升级，且 `docker compose up -d` 重建容器后会退回镜像自带的版本。要连镜像一起升级仍请用 `docker compose pull artex && docker compose up -d artex`。
 - 访问 GitHub 需要代理时，在同一页面配置**全局代理**即可，更新链路会走它。更新只从 GitHub 域名下载并强制 HTTPS。
 
-### 方式二：一键更新脚本
+### 方式二：替换发行包
+
+下载新版本 zip，停掉旧进程后覆盖 `artex` 与 `skills/`，保留 `config.json` 与 `data/`，再运行 `./start.sh`。
+
+### 方式三：重新构建内嵌二进制
 
 ```bash
-cd ARTEX
-./update.sh
-```
-
-脚本先可选 `git pull` 拉取最新代码，再让你选 **① Docker 更新** 或 **② 本地编译更新**（与 `install.sh` 对应）：
-
-- **① Docker**：可指定目标镜像 tag（回车沿用 `.env` 的 `ARTEX_TAG`，缺省 `latest`）→ `docker compose pull` → `docker compose up -d`（换新镜像重启即自动迁移）。
-- **② 本地**：重建前端静态产物 → 重新编译 `./artex`（完成后重启进程生效）。
-
-### 方式三：Docker Compose（手动）
-
-```bash
-cd ARTEX
-git pull                       # 更新 compose / 脚本（可选）
-# 指定版本：在 .env 设 ARTEX_TAG=v0.2.0；不设则用 latest
-docker compose pull artex
-docker compose up -d artex     # 换新镜像重启 → 自动迁移 schema
-docker image prune -f          # 清理旧镜像（可选）
-```
-
-### 方式四：预编译二进制（Releases）
-
-到 [Releases](https://github.com/Hinln/ARTEX/releases) 下载新版本 zip，停掉旧进程后覆盖 `artex` 与 `skills/`（保留你的 `config.json` 与 `data/`），重启即可：
-
-```bash
-cp -r <解压目录>/skills ./ && cp <解压目录>/artex ./
-./start.sh
-```
-
-### 方式五：从源码编译
-
-```bash
-git pull
-cd web && npm ci && npm run build:static && cd ..
-cp -r web/out server/webui/dist
-CGO_ENABLED=0 go build -tags embedui -o artex ./cmd/artex
+git pull --ff-only
+ARTEX_OUTPUT=./artex ./build.sh
 # 重启 ./start.sh
 ```
 
@@ -213,17 +191,17 @@ CGO_ENABLED=0 go build -tags embedui -o artex ./cmd/artex
 
 ## 配置
 
-**数据库**（`config.json`，或用环境变量 `ARTEX_PG_DSN` 覆盖）：
+**数据库**：VPS 修改 `/etc/artex/config.json`；发行包使用 `config.json`。环境变量 `ARTEX_PG_DSN` 可覆盖连接串。
 
 ```json
 {
   "database": {
-    "host": "127.0.0.1", "port": 5432,
-    "user": "artex", "password": "yourpass",
-    "dbname": "artex", "sslmode": "disable"
+    "dsn": "postgresql://user:password@db.example.com:5432/artex?sslmode=require"
   }
 }
 ```
+
+密码中的特殊字符需按 URL 编码。也支持 `host` / `port` / `user` / `password` / `dbname` / `sslmode` 分字段配置，见 `config.example.json`。
 
 **LLM**：`export ANTHROPIC_API_KEY=sk-...`（或 `OPENAI_API_KEY`），也可在 UI 的「LLM 配置」页填写。
 可选：`ARTEX_LLM_PROVIDER` / `ARTEX_LLM_MODEL` / `ARTEX_LLM_BASE_URL` / `ARTEX_LLM_PROXY`。
@@ -234,7 +212,7 @@ CGO_ENABLED=0 go build -tags embedui -o artex ./cmd/artex
 
 ### 反向代理部署（HTTPS / 只开放 443）
 
-前端和 API/SSE 都由同一个后端端口（默认 `:8787`）提供，实时活动流默认走**同源**地址，因此**无需配置 `VITE_SSE_BASE`**，公网只开放 443、把 8787 留在内网即可。
+VPS 部署由 Caddy 在同一个站点提供静态前端和 API/SSE，发行包则由 Go 后端端口（默认 `:8787`）同时提供。实时活动流默认走**同源**地址，无需配置 `VITE_SSE_BASE`。VPS 脚本已配置 Caddy 的静态文件、SPA 回退及 API/SSE 代理；手动配置其他反代时，可参考下面的 Nginx 示例。
 
 SSE 是长连接 + 持续推送，反代**必须关闭缓冲**，否则浏览器能连上却收不到事件（表现为活动流一直转圈）。Nginx 示例：
 
